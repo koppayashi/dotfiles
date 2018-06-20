@@ -3,7 +3,7 @@
 ## Installation
 
 ```
-zsh -c "$(curl -s https://raw.githubusercontent.com/otaaaa/dotfiles/master/setup/install.zsh)"
+zsh -c "$(curl -s https://raw.githubusercontent.com/koppayashi/dotfiles/master/setup/install.zsh)"
 ```
 
 ## Uninstallation

@@ -1,94 +1,130 @@
-source ~/.zplug/init.zsh
-zplug "mafredri/zsh-async", from:github
-zplug "sindresorhus/pure", use:pure.zsh, from:github, as:theme
+# environments.
+export LANG=ja_JP.UTF-8
+export GOPATH=$HOME/go
+export ZPLUG_HOME=/usr/local/opt/zplug
+
+# zplug.
+source $ZPLUG_HOME/init.zsh
 zplug "zsh-users/zsh-completions"
 zplug "zsh-users/zsh-syntax-highlighting", defer:2
 zplug "zsh-users/zsh-autosuggestions"
+
 if ! zplug check --verbose; then
-  printf "Install? [y/N]: "
-  if read -q; then
-    echo; zplug install
-  fi
+    printf "Install? [y/N]: "
+    if read -q; then
+        echo; zplug install
+    fi
 fi
+#zplug load --verbose
 zplug load
 
-export PURE_PROMPT_SYMBOL="$"
+# colors.
+autoload -Uz colors && colors
+
+# keybind.
+bindkey -e
+
+# history.
+HISTFILE=~/.zsh_history
+HISTSIZE=1000000
+SAVEHIST=1000000
+
+# prompt.
+PROMPT="%B%F{green}❯❯%1(v|%1v|)%f%b %B%F{cyan}%~%f%b
+%B%F{green}❯%f%b "
+
+# wordstyle.
+autoload -Uz select-word-style
+select-word-style default
+
+zstyle ':zle:*' word-chars " /=;@:{},|"
+zstyle ':zle:*' word-style unspecified
+
+# completion.
+#autoload -Uz compinit
+#compinit
+
+zstyle ':completion:*:default' menu select=2
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+zstyle ':completion:*' ignore-parents parent pwd ..
+zstyle ':completion:*:sudo:*' command-path /usr/local/sbin /usr/local/bin \
+                   /usr/sbin /usr/bin /sbin /bin /usr/X11R6/bin
+zstyle ':completion:*:processes' command 'ps x -o pid,s,args'
+
+# vcs_info
+autoload -Uz vcs_info
+autoload -Uz add-zsh-hook
+
+setopt prompt_subst
+
+zstyle ':vcs_info:git:*' check-for-changes true
+zstyle ':vcs_info:git:*' unstagedstr '!'
+zstyle ':vcs_info:git:*' stagedstr '+'
+zstyle ':vcs_info:*' formats ' %c%u(%s:%b)'
+zstyle ':vcs_info:*' actionformats ' %c%u(%s:%b|%a)'
+
+function _update_vcs_info_msg() {
+    psvar=()
+    LANG=en_US.UTF-8 vcs_info
+    [[ -n "$vcs_info_msg_0_" ]] && psvar[1]="$vcs_info_msg_0_"
+}
+add-zsh-hook precmd _update_vcs_info_msg
+
+function peco-history-selection() {
+  BUFFER=`history -n 1 | tail -r | awk '!a[$0]++' | peco`
+  CURSOR=$#BUFFER
+  zle reset-prompt
+}
+zle -N peco-history-selection
+
+# options.
+setopt print_eight_bit
+setopt no_beep
+setopt no_flow_control
+setopt ignore_eof
+setopt interactive_comments
 setopt auto_cd
 setopt auto_pushd
-setopt nobeep
-setopt complete_aliases
+setopt pushd_ignore_dups
 setopt share_history
-setopt hist_ignore_dups
+setopt hist_ignore_all_dups
 setopt hist_ignore_space
-HISTFILE="$HOME/.zsh_history"
-HISTSIZE=100000
-SAVEHIST=100000
-autoload history-search-end
-zle -N history-beginning-search-backward-end history-search-end
-zle -N history-beginning-search-forward-end history-search-end
-bindkey "^P" history-beginning-search-backward-end
-bindkey "^N" history-beginning-search-forward-end
+setopt hist_reduce_blanks
+setopt extended_glob
 
-export LANG=ja_JP.UTF-8
-export EDITOR=nvim
-export GOPATH=$HOME/go
-export XDG_CONFIG_HOME=~/.config
+# keybinds.
+#bindkey '^R' history-incremental-pattern-search-backward
+bindkey '^R' peco-history-selection
+bindkey '^S' history-incremental-pattern-search-forward
 
-eval "$(rbenv init -)"
-eval "$(nodenv init -)"
-eval "$(hub alias -s)"
+# aliases.
+export CLICOLOR=1
 
-alias ll="ls -lG"
-alias la="ls -laG"
-alias lap="ls -la | peco"
-alias ns="npm ls -g --depth=0"
-alias vim='nvim'
-alias be='bundle exec'
-alias repo='cd $(ghq list -p | peco)'
-alias gl="git log --no-merges --date=short --pretty='format:%C(yellow)%h %C(green)%cd %C(blue)%an%C(red)%d %C(reset)%s'"
-alias drm='docker rm $(docker ps -aq)'
-alias drmi='docker rmi $(docker images -q)'
-alias drmv='docker volume rm $(docker volume ls -q)'
-alias pwdy='pwd | pbcopy'
-alias reload='source ~/.zshrc'
-alias cop='docker-compose run --rm app bundle exec rubocop -a'
-alias spec='docker-compose run --rm app bundle exec rspec'
-alias console='docker-compose run --rm app bin/rails c'
-alias routes='docker-compose run --rm app bin/rake routes'
-alias ridgepole='docker-compose run --rm app bin/rake ridgepole:apply'
-alias run='docker-compose run --rm app'
+alias ls='ls -G -F'
+alias la='ls -a'
+alias ll='ls -l'
+alias lr='ls -ltr'
+alias lar='ls -ltra'
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+alias mkdir='mkdir -p'
+alias sudo='sudo -E '
+alias h='history'
+alias drmi='docker system prune'
 
-setopt EXTENDED_GLOB
-for rcfile in "${ZDOTDIR:-$HOME}"/.zprezto/runcoms/^README.md(.N); do
-  ln -s "$rcfile" "${ZDOTDIR:-$HOME}/.${rcfile:t}"
-done
+# global aliases.
+alias -g L='| less'
+alias -g G='| grep'
+alias -g X='| xargs'
+alias -g C='| pbcopy'
+alias -g P='| peco'
 
-if which peco &> /dev/null; then
-  function peco_select_history() {
-    BUFFER=`history -n 1 | tail -r  | awk '!a[$0]++' | peco`
-    CURSOR=$#BUFFER
-    zle reset-prompt
-  }
+#if [ -e /usr/local/share/zsh-completions ]; then
+#  fpath=(/usr/local/share/zsh-completions $fpath)
+#
+#  autoload -U compinit
+#  compinit -u
+#fi
 
-  zle -N peco_select_history
-  bindkey '^R' peco_select_history
-fi
-
-function keygen() {
-  local length=12
-  echo "$(openssl rand -base64 $length)"
-}
-
-function region {
-  cat <<EOF
-- provider: GCP
-  region: asia-northeast1
-  availability_zone:
-  - asia-northeast1-a
-  - asia-northeast1-b
-  - asia-northeast1-c
-- provider: AWS
-  region: ap-northeast-1
-EOF
-}
-
+# vim:set ft=zsh:
