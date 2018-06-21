@@ -2,6 +2,8 @@
 export LANG=ja_JP.UTF-8
 export GOPATH=$HOME/go
 export ZPLUG_HOME=/usr/local/opt/zplug
+export XDG_CONFIG_HOME=~/.config
+export CLICOLOR=1
 
 # zplug.
 source $ZPLUG_HOME/init.zsh
@@ -10,10 +12,10 @@ zplug "zsh-users/zsh-syntax-highlighting", defer:2
 zplug "zsh-users/zsh-autosuggestions"
 
 if ! zplug check --verbose; then
-    printf "Install? [y/N]: "
-    if read -q; then
-        echo; zplug install
-    fi
+  printf "Install? [y/N]: "
+  if read -q; then
+    echo; zplug install
+  fi
 fi
 #zplug load --verbose
 zplug load
@@ -64,9 +66,9 @@ zstyle ':vcs_info:*' formats ' %c%u(%s:%b)'
 zstyle ':vcs_info:*' actionformats ' %c%u(%s:%b|%a)'
 
 function _update_vcs_info_msg() {
-    psvar=()
-    LANG=en_US.UTF-8 vcs_info
-    [[ -n "$vcs_info_msg_0_" ]] && psvar[1]="$vcs_info_msg_0_"
+  psvar=()
+  LANG=en_US.UTF-8 vcs_info
+  [[ -n "$vcs_info_msg_0_" ]] && psvar[1]="$vcs_info_msg_0_"
 }
 add-zsh-hook precmd _update_vcs_info_msg
 
@@ -98,8 +100,8 @@ bindkey '^R' peco-history-selection
 bindkey '^S' history-incremental-pattern-search-forward
 
 # aliases.
-export CLICOLOR=1
-
+alias vi='nvim'
+alias vim='nvim'
 alias ls='ls -G -F'
 alias la='ls -a'
 alias ll='ls -l'
@@ -120,11 +122,13 @@ alias -g X='| xargs'
 alias -g C='| pbcopy'
 alias -g P='| peco'
 
+# setup.
+eval "$(rbenv init -)"
+eval "$(nodenv init -)"
+
 #if [ -e /usr/local/share/zsh-completions ]; then
 #  fpath=(/usr/local/share/zsh-completions $fpath)
 #
 #  autoload -U compinit
 #  compinit -u
 #fi
-
-# vim:set ft=zsh:
