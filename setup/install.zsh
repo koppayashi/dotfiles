@@ -2,7 +2,7 @@
 
 # clone repository
 if [[ ! -e ${HOME}/.dotfiles ]]; then
-  git clone https://github.com/otaaaa/dotfiles.git ${HOME}/.dotfiles
+  git clone https://github.com/koppayashi/dotfiles.git ${HOME}/.dotfiles
 else
   git -C ${HOME}/.dotfiles pull
 fi
@@ -31,11 +31,11 @@ for name in *; do
 done
 
 # zplug
-if [[ ! -d ${HOME}/.zplug ]]; then
-  curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh
-fi
-
-source ${HOME}/.zshrc
+#if [[ ! -d ${HOME}/.zplug ]]; then
+#  curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh
+#fi
 
 # Install brew packages
 cd ${HOME} && brew bundle --file=${HOME}/.dotfiles/setup/Brewfile
+
+source ${HOME}/.zshrc
