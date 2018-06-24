@@ -38,4 +38,14 @@ done
 # Install brew packages
 cd ${HOME} && brew bundle --file=${HOME}/.dotfiles/setup/Brewfile
 
+# setup font cashes.
+cp -f /usr/local/opt/ricty/share/fonts/Ricty*.ttf ~/Library/Fonts/
+fc-cache -vf
+
+# dein.vim
+if [[ ! -d ${HOME}/.cache/dein ]]; then
+  curl https://raw.githubusercontent.com/Shougo/dein.vim/master/bin/installer.sh > ~/installer.sh
+  sh ~/installer.sh ~/.cache/dein
+fi
+
 source ${HOME}/.zshrc
