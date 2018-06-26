@@ -134,9 +134,5 @@ alias -g P='| peco'
 eval "$(rbenv init -)"
 eval "$(nodenv init -)"
 
-#if [ -e /usr/local/share/zsh-completions ]; then
-#  fpath=(/usr/local/share/zsh-completions $fpath)
-#
-#  autoload -U compinit
-#  compinit -u
-#fi
+source '/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc'
+source '/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc'
