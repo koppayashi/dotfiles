@@ -4,6 +4,7 @@ export GOPATH=$HOME/go
 export ZPLUG_HOME=/usr/local/opt/zplug
 export XDG_CONFIG_HOME=~/.config
 export CLICOLOR=1
+export WORDCHARS="*?_-.[]~=&;!#$%^(){}<"
 
 # zplug.
 source $ZPLUG_HOME/init.zsh
@@ -122,6 +123,8 @@ alias rubocop='docker-compose run --rm app bundle exec rubocop -a'
 alias routes='docker-compose run --rm app bin/rake routes'
 alias drun='docker-compose run --rm app'
 alias dup='docker-compose up'
+alias dkill='docker kill $(docker ps -q)'
+alias drm='docker rm $(docker ps -a -q)'
 
 # global aliases.
 alias -g L='| less'
