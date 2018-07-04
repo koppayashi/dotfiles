@@ -31,6 +31,8 @@ set showmatch
 set wildmenu
 set history=5000
 
+set clipboard+=unnamed
+
 nnoremap j gj
 nnoremap k gk
 
