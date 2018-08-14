@@ -120,12 +120,14 @@ alias gh='hub browse $(ghq list | peco | cut -d "/" -f 2,3)'
 alias dbc='docker-compose run --rm app bin/rake db:create'
 alias ridgepole='docker-compose run --rm app bin/rake ridgepole:apply'
 alias rubocop='docker-compose run --rm app bundle exec rubocop -a'
+alias rspec='docker-compose run --rm -e "RAILS_ENV=test" app bundle exec rspec'
 alias routes='docker-compose run --rm app bin/rake routes'
 alias seed='docker-compose run --rm app bin/rake db:seed'
 alias drun='docker-compose run --rm app'
 alias dup='docker-compose up'
 alias dkill='docker kill $(docker ps -q)'
 alias drm='docker rm $(docker ps -a -q)'
+alias debug='docker-compose run --rm --service-ports app'
 
 # global aliases.
 alias -g L='| less'
@@ -134,9 +136,21 @@ alias -g X='| xargs'
 alias -g C='| pbcopy'
 alias -g P='| peco'
 
+# Kubernetes
+alias -g KP='$(kubectl get pods | peco | awk "{print \$1}")'
+alias -g KD='$(kubectl get deploy | peco | awk "{print \$1}")'
+alias -g KS='$(kubectl get svc | peco | awk "{print \$1}")'
+alias -g KI='$(kubectl get ing | peco | awk "{print \$1}")'
+alias kc='kubectl'
+alias kce='kubectl exec -it KP'
+alias kcl='kubectl logs -f KP'
+
 # setup.
 eval "$(rbenv init -)"
 eval "$(nodenv init -)"
 
 source '/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc'
 source '/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc'
+
+export PATH="/usr/local/opt/gettext/bin:$PATH"
+

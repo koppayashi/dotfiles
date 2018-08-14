@@ -4,9 +4,11 @@ tap "homebrew/core"
 tap "sanemat/font"
 brew "bash"
 brew "bash-completion"
+brew "gettext", link: true
 brew "pcre"
 brew "carthage"
 brew "composer"
+brew "sqlite"
 brew "ghq"
 brew "git"
 brew "hub"
@@ -16,7 +18,6 @@ brew "libyaml"
 brew "mas"
 brew "neovim"
 brew "nodenv"
-brew "sqlite"
 brew "peco"
 brew "perl"
 brew "phantomjs"
@@ -29,16 +30,18 @@ brew "zplug"
 brew "zsh"
 brew "sanemat/font/ricty"
 cask "docker"
-cask "evernote"
 cask "franz"
 cask "google-chrome"
 cask "google-cloud-sdk"
-cask "google-japanese-ime"
 cask "intellij-idea"
 cask "iterm2"
-cask "visual-studio-code"
-cask "sublime-text"
 cask "sequel-pro"
+cask "sublime-text"
+cask "visual-studio-code"
+mas "GarageBand", id: 682658836
+mas "iMovie", id: 408981434
 mas "Keynote", id: 409183694
+mas "Numbers", id: 409203825
+mas "Pages", id: 409201541
 mas "Slack", id: 803453959
 mas "Xcode", id: 497799835
