@@ -94,6 +94,7 @@ setopt hist_ignore_all_dups
 setopt hist_ignore_space
 setopt hist_reduce_blanks
 setopt extended_glob
+setopt nonomatch
 
 # keybinds.
 #bindkey '^R' history-incremental-pattern-search-backward
@@ -128,6 +129,8 @@ alias dup='docker-compose up'
 alias dkill='docker kill $(docker ps -q)'
 alias drm='docker rm $(docker ps -a -q)'
 alias debug='docker-compose run --rm --service-ports app'
+alias console='drun rails c'
+alias sandbox='console -s'
 
 # global aliases.
 alias -g L='| less'
@@ -141,9 +144,14 @@ alias -g KP='$(kubectl get pods | peco | awk "{print \$1}")'
 alias -g KD='$(kubectl get deploy | peco | awk "{print \$1}")'
 alias -g KS='$(kubectl get svc | peco | awk "{print \$1}")'
 alias -g KI='$(kubectl get ing | peco | awk "{print \$1}")'
+alias -g KN='$(kubectl get nodes | peco | awk "{print \$1}")'
 alias kc='kubectl'
 alias kce='kubectl exec -it KP'
 alias kcl='kubectl logs -f KP'
+alias kcd='kubectl describe pod KP'
+alias kcdn='kubectl describe node KN'
+alias kt='kubectl top nodes'
+if [ $commands[kubectl] ]; then source <(kubectl completion zsh); fi
 
 # setup.
 eval "$(rbenv init -)"
@@ -154,3 +162,50 @@ source '/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.in
 
 export PATH="/usr/local/opt/gettext/bin:$PATH"
 
+function proxy {
+  ~/cloud_sql_proxy -instances=$INSTANCE_CONNECTION_NAME=tcp:3306 \
+                    -credential_file=$CLOUD_SQL_PROXY_CREDENTIALS
+}
+
+[ -f ~/.zshrc.local ] && source ~/.zshrc.local
+
+function cleanup {
+  docker-compose stop && \
+  docker container prune -f && \
+  docker volume rm creal_redis-data && \
+  rm -f tmp/pids/server.pid
+}
+
+function serve_debug {
+  cleanup
+  docker-compose run --rm --service-ports app
+}
+
+function serve {
+  cleanup
+  docker-compose up
+}
+
+function cluster {
+  gcloud auth activate-service-account $GOOGLE_SERVICE_ACCOUNT --key-file $GOOGLE_APPLICATION_CREDENTIALS --project=$GOOGLE_PROJECT_ID
+  gcloud container clusters get-credentials -z asia-east1-a $CLUSTER_NAME
+}
+
+# ansible-vault
+function encrypt {
+  tmpfile=$(mktemp)
+  echo $VAULT_PASSWORD >> $tmpfile
+  ansible-vault encrypt --vault-password-file=$tmpfile $@
+  rm $tmpfile
+}
+
+function decrypt {
+  tmpfile=$(mktemp)
+  echo $VAULT_PASSWORD >> $tmpfile
+  ansible-vault decrypt --vault-password-file=$tmpfile $@
+  rm $tmpfile
+}
+
+function ipv4 {
+  ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'
+}

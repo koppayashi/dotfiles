@@ -3,6 +3,7 @@
 	name = koppayashi
 [core]
 	excludesfile = ~/.gitignore_global
+	autocrlf = input
 [alias]
 	co = checkout
 	br = branch
