@@ -9,5 +9,17 @@
 	br = branch
 	ci = commit
 	st = status
+  save = commit -m
+  resave = commit --amend -m
+  graph = log --graph -10 --branches --remotes --tags  --format=format:'%Cgreen%h %Creset• %<(75,trunc)%s (%cN, %ar) %Cred%d' --date-order
+  history = log -10 --format=format:'%Cgreen%h %Creset%s (%aN, %ar)'
+  new-branch = checkout -b
+  delete-branch = branch -D
+  prestage = diff -w
+  precommit = diff -w --cached
+  move = mv
+  remove = rm
 [commit]
 	template = ~/.gitmessage
+[credential]
+	helper = osxkeychain

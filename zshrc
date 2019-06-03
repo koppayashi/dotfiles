@@ -5,6 +5,7 @@ export ZPLUG_HOME=/usr/local/opt/zplug
 export XDG_CONFIG_HOME=~/.config
 export CLICOLOR=1
 export WORDCHARS="*?_-.[]~=&;!#$%^(){}<"
+export HOMEBREW_NO_INSTALL_CLEANUP=1 # for homebrew
 
 # zplug.
 source $ZPLUG_HOME/init.zsh
@@ -97,7 +98,6 @@ setopt extended_glob
 setopt nonomatch
 
 # keybinds.
-#bindkey '^R' history-incremental-pattern-search-backward
 bindkey '^R' peco-history-selection
 bindkey '^S' history-incremental-pattern-search-forward
 
@@ -115,6 +115,7 @@ alias mv='mv -i'
 alias mkdir='mkdir -p'
 alias sudo='sudo -E '
 alias h='history'
+alias reload="source ~/.zshrc"
 alias drmi='docker system prune'
 alias g='cd $(ghq root)/$(ghq list | peco)'
 alias gh='hub browse $(ghq list | peco | cut -d "/" -f 2,3)'
@@ -138,6 +139,10 @@ alias -g G='| grep'
 alias -g X='| xargs'
 alias -g C='| pbcopy'
 alias -g P='| peco'
+
+alias preci="circleci local execute --job deploy-stg \
+                                    -e GCLOUD_SERVICE_KEY='$(cat ~/.ssh/stg-creal-terraform.json)' \
+                                    -e RAILS_MASTER_KEY=$(cat ~/.ghq/github.com/bridge-c-capital/creal/config/master.key)"
 
 # Kubernetes
 alias -g KP='$(kubectl get pods | peco | awk "{print \$1}")'
@@ -187,8 +192,11 @@ function serve {
 }
 
 function cluster {
+  gcloud container clusters get-credentials -z $ZONE_NAME $CLUSTER_NAME
+}
+
+function gauth {
   gcloud auth activate-service-account $GOOGLE_SERVICE_ACCOUNT --key-file $GOOGLE_APPLICATION_CREDENTIALS --project=$GOOGLE_PROJECT_ID
-  gcloud container clusters get-credentials -z asia-east1-a $CLUSTER_NAME
 }
 
 # ansible-vault
@@ -196,16 +204,19 @@ function encrypt {
   tmpfile=$(mktemp)
   echo $VAULT_PASSWORD >> $tmpfile
   ansible-vault encrypt --vault-password-file=$tmpfile $@
-  rm $tmpfile
+  rm -f $tmpfile
 }
 
 function decrypt {
   tmpfile=$(mktemp)
   echo $VAULT_PASSWORD >> $tmpfile
   ansible-vault decrypt --vault-password-file=$tmpfile $@
-  rm $tmpfile
+  rm -f $tmpfile
 }
 
 function ipv4 {
   ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'
 }
+
+alias gls='gcloud config configurations list'
+alias ctx='source $(find ~/.env -type f | peco); gauth'
