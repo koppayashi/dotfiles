@@ -72,6 +72,7 @@ let s:dein_dir = expand('~/.cache/dein')
 let s:dein_repo_dir = s:dein_dir . '/repos/github.com/Shugo/dein.vim'
 let s:toml_dir = expand('~/.config/nvim')
 let s:toml_file = s:toml_dir . '/dein.toml'
+let g:python_host_prog = expand('/usr/local/bin/python')
 let g:python3_host_prog = expand('/usr/local/bin/python3')
 
 if !isdirectory(s:dein_repo_dir)
@@ -94,3 +95,4 @@ if dein#check_install()
 endif
 
 "End dein Scripts-------------------------
+

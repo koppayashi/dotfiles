@@ -116,7 +116,6 @@ alias mkdir='mkdir -p'
 alias sudo='sudo -E '
 alias h='history'
 alias reload="source ~/.zshrc"
-alias drmi='docker system prune'
 alias g='cd $(ghq root)/$(ghq list | peco)'
 alias gh='hub browse $(ghq list | peco | cut -d "/" -f 2,3)'
 alias dbc='docker-compose run --rm app bin/rake db:create'
@@ -129,9 +128,13 @@ alias drun='docker-compose run --rm app'
 alias dup='docker-compose up'
 alias dkill='docker kill $(docker ps -q)'
 alias drm='docker rm $(docker ps -a -q)'
+alias dprune='docker system prune'
+alias drmi='docker rmi $(docker images | peco | awk "{print \$3}")'
 alias debug='docker-compose run --rm --service-ports app'
 alias console='drun rails c'
 alias sandbox='console -s'
+alias -g DPS='docker ps --format "{{.ID}}\t{{.Image}}\t{{.Status}}\t{{.Command}}\t{{.RunningFor}}"'
+alias de='docker exec -it `DPS | peco | cut -f 1` /bin/sh'
 
 # global aliases.
 alias -g L='| less'
@@ -141,7 +144,7 @@ alias -g C='| pbcopy'
 alias -g P='| peco'
 
 alias preci="circleci local execute --job deploy-stg \
-                                    -e GCLOUD_SERVICE_KEY='$(cat ~/.ssh/stg-creal-terraform.json)' \
+                                    -e GCLOUD_SERVICE_KEY='$(cat ~/.ssh/stg-creal.json)' \
                                     -e RAILS_MASTER_KEY=$(cat ~/.ghq/github.com/bridge-c-capital/creal/config/master.key)"
 
 # Kubernetes
@@ -167,11 +170,6 @@ source '/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.in
 
 export PATH="/usr/local/opt/gettext/bin:$PATH"
 
-function proxy {
-  ~/cloud_sql_proxy -instances=$INSTANCE_CONNECTION_NAME=tcp:3306 \
-                    -credential_file=$CLOUD_SQL_PROXY_CREDENTIALS
-}
-
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local
 
 function cleanup {
@@ -193,6 +191,7 @@ function serve {
 
 function cluster {
   gcloud container clusters get-credentials -z $ZONE_NAME $CLUSTER_NAME
+  gconfig
 }
 
 function gauth {
@@ -218,5 +217,33 @@ function ipv4 {
   ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'
 }
 
+function gconfig {
+  echo "Project     [$(gcloud config get-value project)]"
+  echo "K8s Context [$(kubectl config current-context)]"
+}
+
+function gcluster {
+  source $(find ~/.env/auth/{stg,prod}-* -type f | peco)
+  gcloud auth activate-service-account $GOOGLE_SERVICE_ACCOUNT --key-file $GOOGLE_APPLICATION_CREDENTIALS --project=$GOOGLE_PROJECT_ID
+  gcloud container clusters get-credentials --region $REGION_NAME $CLUSTER_NAME
+  gconfig
+}
+
+function proxy {
+  source $(find ~/.env/proxy/{stg,prod}-* -type f | peco)
+  ~/cloud_sql_proxy -instances=$INSTANCE_CONNECTION_NAME=tcp:3306 \
+                    -credential_file=$CLOUD_SQL_PROXY_CREDENTIALS
+}
+
+function gcr_clean {
+  source $(find ~/.env/auth/{stg,prod}-* -type f | peco)
+  gcloud auth activate-service-account $GOOGLE_SERVICE_ACCOUNT --key-file $GOOGLE_APPLICATION_CREDENTIALS --project=$GOOGLE_PROJECT_ID
+  local date=`gdate '+%Y-%m-%d' -d '1 months ago'`
+  local image="gcr.io/${GOOGLE_PROJECT_ID}/rails"
+  for digest in $(gcloud container images list-tags $image --filter="timestamp.datetime < '${date}'" --format='get(digest)'); do
+    gcloud container images delete -q --force-delete-tags "${image}@${digest}" 
+  done
+}
+
 alias gls='gcloud config configurations list'
-alias ctx='source $(find ~/.env -type f | peco); gauth'
+alias ctx='source $(find ~/.env/auth/{dev,stg,prod}-* -type f | peco); gauth'
