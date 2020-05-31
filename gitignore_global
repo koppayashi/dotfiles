@@ -4,6 +4,7 @@
 .LSOverride
 .idea
 .node-version
+.editorconfig
 
 # Icon must end with two \r
 Icon

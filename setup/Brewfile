@@ -51,5 +51,4 @@ cask "sequel-pro"
 cask "sublime-text"
 cask "visual-studio-code"
 mas "Keynote", id: 409183694
-mas "Slack", id: 803453959
-mas "Xcode", id: 497799835
+
